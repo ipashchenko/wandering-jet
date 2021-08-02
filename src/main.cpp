@@ -38,8 +38,7 @@ void run_on_analytic() {
 //    double los_angle = 17.0*M_PI/180.0;
 
     // FIXME: tested
-//    double los_angle = 0.75*M_PI/180.0;
-    double los_angle = 1.75*M_PI/180.0;
+    double los_angle = 0.75*M_PI/180.0;
 
 
     //double redshift = 0.01;
@@ -121,10 +120,10 @@ void run_on_analytic() {
 
 
     // Jet B-field (inside inner cylinder)
-    ConstCylinderBFieldZ jetbfield(0.1, 1, true, 0.0, &geometry);
+//    ConstCylinderBFieldZ jetbfield(0.1, 1, true, 0.0, &geometry);
 
     // TODO: Tested
-//    HelicalConicalBField jetbfield(0.1, 1, 89.*M_PI/180., true, 0.0, &geometry);
+    HelicalConicalBField jetbfield(0.1, 1, 89.*M_PI/180., true, 0.0, &geometry);
 
     //HelicalCylinderBField jetbfield_sheath(B_1_sheath, pitch_angle_sheath, true, 0.0,
     //                                       &geometry_in, &geometry_inner);
