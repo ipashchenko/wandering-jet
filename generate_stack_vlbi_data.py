@@ -291,12 +291,12 @@ def generate_model_images(parallels_run_file, LOS_angels_rad, epochs, exec_dir, 
 # plt.show()
 
 
-calculon = False
+calculon = True
 if calculon:
     base_dir = "/home/ilya/github/wandering-jet"
 else:
     base_dir = "/home/ilya/github/time_machine/bk_transfer"
-n_epochs = 20
+n_epochs = None
 freq_ghz = 15.4
 data_dir = "/home/ilya/Downloads/1641+399"
 files = glob.glob(os.path.join(data_dir, "*.pcn.png"))
