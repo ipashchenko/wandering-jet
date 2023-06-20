@@ -264,6 +264,21 @@ double PowerLaw::eta_v(Vector3d &b, Vector3d &n_los, double nu, double n_nt) con
 }
 
 
+double PowerLaw::get_equipartition_bsq_coefficient() const {
+	double gamma_max = 1E+04;
+	if (changing_s_) {
+		throw NotImplmentedEquipartitionAnisotropicPowerLaw();
+	}
+	if(s_ != 2.0) {
+//        return (s_ - 2)/(s_ - 1)/(8*M_PI*m_e*c*c*gamma_min_);
+		return (s_ - 2)/(s_ - 1) / (8*M_PI*m_e*c*c) * (pow(gamma_min_, 1.-s_) - pow(gamma_max, 1.-s_)) / (pow(gamma_min_, 2.-s_) - pow(gamma_max, 2.-s_));
+	} else {
+		return 1.0/(8*M_PI*m_e*c*c*gamma_min_*log(gamma_max/gamma_min_));
+	}
+}
+
+
+
 double Thermal::k_i(Vector3d &b, Vector3d &n_los, double nu, double n) const {
     return 0.0;
 }
