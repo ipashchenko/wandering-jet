@@ -295,7 +295,7 @@ if __name__ == "__main__":
     # NOTE: B and N-field models, as well as \Gamma are specified in main.cpp. Thus, after it you want to ``make``.
 
     # Work on calculon?
-    calculon = False
+    calculon = True
     # Set working directory according to this:
     # FIXME: You should change this accordingly!
     if calculon:
@@ -306,7 +306,7 @@ if __name__ == "__main__":
 
     # If ``None`` -> using all available epochs. Otherwise, use only first ``n_epochs`` epochs. Useful for debugging
     # purposes, when you want to set e.g. ``n_epochs = 2``.
-    n_epochs = 5
+    n_epochs = None
 
     # Will be used in folder name containing results. Just to distinguish the results obtained with different models
     # of magnetic field or particle density. E.g. ``toroidal``, ``equipartition_toroidal``, ...
