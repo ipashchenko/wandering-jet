@@ -25,7 +25,7 @@ if __name__ == "__main__":
     CLI.add_argument("--beam_restore",  # name on the CLI - drop the `--` for positional/required parameters
                      nargs="*",
                      type=float,
-                     default=[0.7, 0.7, 0]
+                     default=[0.73, 0.73, 0]
                      # default=[1.353, 1.557, -65.65],  # default if nothing is provided
                      # default=[4.561, 5.734, -51.67],  # default if nothing is provided
                      )
@@ -41,6 +41,13 @@ if __name__ == "__main__":
     beam_restore = args.beam_restore
     path_to_script = args.path_to_script
     mapsize_clean = args.mapsize_clean
+
+    print(uvfits_file)
+    print(epoch)
+    print(save_dir)
+    print(beam_restore)
+    print(path_to_script)
+    print(mapsize_clean)
 
     stokes = ("I", "Q", "U")
     base_name = os.path.split(uvfits_file)[-1]
