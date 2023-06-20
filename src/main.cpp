@@ -60,13 +60,8 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
     Cone geometry(origin, direction, cone_half_angle, big_scale);
 
     // Setting components of B-fields ==================================================================================
-	// TODO: Tested
-//	HelicalConicalBField jetbfield(0.1, 1, 89.*M_PI/180., true, 0.0, &geometry);
 	HelicalConicalBField jetbfield(1.00, 1, 89.*M_PI/180., true, 0.0, &geometry);
-	// FIXME: This was used with n = 1.5
-//	ToroidalBField jetbfield(0.1, 1, true, 0.0, &geometry);
-	// FIXME: This was used with n = 2.0
-//	ToroidalBField jetbfield(0.25, 1, true, 0.0, &geometry);
+//	ToroidalBField jetbfield(1.0, 1, true, 0.0, &geometry);
     std::vector<VectorBField*> vbfields;
     vbfields.push_back(&jetbfield);
 
@@ -90,16 +85,13 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
     // Setting V-field =================================================================================================
     VField* vfield;
     bool central_vfield = true;
-	// FIXME: This was used with n = 1.5
 	double Gamma = 5.0;
-    //double Gamma = 1.56;
     if (central_vfield) {
         vfield = new ConstCentralVField(Gamma, &geometry, 0.0);
     } else {
         vfield = new ConstFlatVField(Gamma, &geometry, 0.0);
     }
 	
-	// TODO: Tested
     BKNField power_law_nfield_spine(K_1, n, &particles, true, &geometry, nullptr, vfield);
 	// Equipartition particles density
 //	EquipartitionBKNfield power_law_nfield_spine(&particles, vbfields, &geometry, nullptr, vfield);
@@ -111,13 +103,9 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
 
     // FIXME: Put inside frequency loop for dep. on frequency
     // Setting parameters of pixels and image ==========================================================================
-//    int number_of_pixels_along = 1200;
-//    int number_of_pixels_across = 400;
 	int number_of_pixels_along = 500;
 	int number_of_pixels_across = 300;
     // Non-uniform pixel from ``pixel_size_mas_start`` (near BH) to ``pixel_size_mas_stop`` (image edges)
-//    double pixel_size_mas_start = 0.0001;
-//    double pixel_size_mas_stop = 0.1;
 	double pixel_size_mas_start = 0.01;
 	double pixel_size_mas_stop = 0.1;
     auto image_size = std::make_pair(number_of_pixels_across, number_of_pixels_along);
