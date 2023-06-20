@@ -291,6 +291,11 @@ def generate_model_images(parallels_run_file, LOS_angels_rad, epochs, exec_dir, 
 # plt.show()
 
 
+calculon = False
+if calculon:
+    base_dir = "/home/ilya/github/wandering-jet"
+else:
+    base_dir = "/home/ilya/github/time_machine/bk_transfer"
 n_epochs = 20
 freq_ghz = 15.4
 data_dir = "/home/ilya/Downloads/1641+399"
@@ -312,11 +317,8 @@ phi_0_rad = 0.0
 
 # Directory to save files
 bfield_model = "helical_conical"
-save_dir = "/home/ilya/github/time_machine/bk_transfer/results/3C454.3/{}_los_{}_delta_{}_T_{}_phi0_{}".format(bfield_model,
-                                                                                                            los_ange_deg_0,
-                                                                                                            delta_deg,
-                                                                                                            T_years,
-                                                                                                            phi_0_rad)
+save_dir = "{}/results/3C454.3/{}_los_{}_delta_{}_T_{}_phi0_{}".format(base_dir, bfield_model, los_ange_deg_0,
+                                                                       delta_deg, T_years, phi_0_rad)
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
@@ -340,7 +342,7 @@ npixels_beam = np.pi*common_beam[0]*common_beam[1]/(4*np.log(2)*mapsize[1]**2)
 print("#pixels in beam = {}".format(int(npixels_beam)))
 
 # common_beam = (0.7, 0.7, 0)
-jetpol_run_directory = "/home/ilya/github/time_machine/bk_transfer/Release"
+jetpol_run_directory = "{}/Release".format(base_dir)
 
 # C++ code run parameters
 # z = 0.00436
@@ -364,8 +366,8 @@ print("Model jet extends up to {:.1f} mas!".format(np.sum(resolutions)))
 
 # Plot only jet emission and do not plot counter-jet?
 jet_only = True
-path_to_script = "/home/ilya/github/time_machine/bk_transfer/scripts/script_clean_rms"
-parallels_run_file = "/home/ilya/github/time_machine/bk_transfer/parallels_run.txt"
+path_to_script = "{}/scripts/script_clean_rms".format(base_dir)
+parallels_run_file = "{}/parallels_run.txt".format(base_dir)
 
 
 images_i = list()
