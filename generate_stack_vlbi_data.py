@@ -389,6 +389,7 @@ if __name__ == "__main__":
     LOS_angels_rad = list()
     PAs_rad = list()
     epochs_to_calculate = list()
+    times_to_calculate = list()
     for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
         if n_epochs is not None:
             if i_epoch == n_epochs:
@@ -404,9 +405,11 @@ if __name__ == "__main__":
         los_angle_rad = theta_los_rot(phi, los_angle_rad_0, delta)
         LOS_angels_rad.append(los_angle_rad)
         epochs_to_calculate.append(epoch)
+        times_to_calculate.append(time)
 
     # Calculate only ``n_epochs`` epochs.
     epochs = epochs_to_calculate
+    times = times_to_calculate
     # Generate images in parallel
     generate_model_images(parallels_run_file, cone_half_angle, LOS_angels_rad, epochs, jetpol_run_directory,
                           calculon=calculon)
