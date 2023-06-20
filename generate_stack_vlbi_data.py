@@ -607,3 +607,9 @@ if __name__ == "__main__":
                 cmap='gnuplot', contour_color='black', plot_colorbar=True,
                 contour_linewidth=0.25)
     fig.savefig(os.path.join(save_dir, "observed_stack_pang_std.png"), dpi=600, bbox_inches="tight")
+
+    # Save stack
+    stack_dict = {"stack_i": stack_i, "stack_q": stack_q, "stack_u": stack_u, "stack_p": stack_p,
+                  "stack_fpol": stack_fpol, "stack_pang": stack_pang, "stack_pang_std": stack_pang_std}
+    for stack_type, stack_array in stack_dict.items():
+        np.savetxt(os.path.join(save_dir, "{}.txt".format(stack_type)), stack_array)
