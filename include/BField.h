@@ -3,8 +3,12 @@
 
 #include <Eigen/Eigen>
 #include "Geometry.h"
+#include "utils.h"
 
 using Eigen::Vector3d;
+
+
+const double l_eps_B = 0.0001*pc;
 
 
 // B-field with vector values, e.g. ordered component or ordered component with cells, with specified fraction of the
