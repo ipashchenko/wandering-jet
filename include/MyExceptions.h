@@ -72,4 +72,10 @@ class BadHeatingProfileParameters : public std::exception {
         }
 };
 
+class NotImplmentedEquipartitionAnisotropicPowerLaw : public std::exception {
+		const char * what () const noexcept override {
+			return "Equipartition Power Law with anisotropic spectral index is not implemented!";
+		}
+};
+
 #endif //MHD_TRANSFER_INCLUDE_MYEXCEPTIONS_H
