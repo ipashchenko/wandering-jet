@@ -492,7 +492,11 @@ for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
     # Optionally
     uvdata.rotate_evpa(np.deg2rad(rot_angle_deg))
     uvdata.noise_add(noise)
-    uvdata.save(os.path.join(save_dir, "template.uvf"), rewrite=True)
+    if epoch in ("2014_06_05",):
+        downscale_by_freq = True
+    else:
+        downscale_by_freq = False
+    uvdata.save(os.path.join(save_dir, "template.uvf"), rewrite=True, downscale_by_freq=downscale_by_freq)
 
     # CLEAN synthetic UV-data
     for stk in stokes:
