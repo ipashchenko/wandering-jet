@@ -183,8 +183,8 @@ def find_iqu_image_std(i_image_array, q_image_array, u_image_array, beam_npixels
 
     # Find preliminary bounding box
     blc, trc = find_bbox(i_image_array, level=4*std,
-                         min_maxintensity_mjyperbeam=4*std,
-                         min_area_pix=2*beam_npixels,
+                         min_maxintensity_mjyperbeam=50*std,
+                         min_area_pix=20*beam_npixels,
                          delta=0)
 
     # Now mask out source emission using found bounding box and estimate std
