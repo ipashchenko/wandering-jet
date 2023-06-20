@@ -286,7 +286,7 @@ def generate_model_images(parallels_run_file, cone_half_angle, LOS_angels_rad, e
     n_jobs = 4
     if calculon:
         n_jobs = 44
-    os.system("parallel --files --results t_obs_{3}" + f" --joblog log --jobs {n_jobs} -a {parallels_run_file} -n 1 -m --colsep ' ' \"./bk_transfer\"")
+    os.system("parallel --files --results epoch_{3}" + f" --joblog log --jobs {n_jobs} -a {parallels_run_file} -n 1 -m --colsep ' ' \"./bk_transfer\"")
     os.chdir(cwd)
 
 
