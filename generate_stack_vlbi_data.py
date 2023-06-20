@@ -39,7 +39,7 @@ def get_epochs_from_image_list(files):
         times.append(time)
     times = np.array(times)
     times = np.round(times - np.min(times), 2)
-    return np.sort(times), epochs
+    return times, epochs
 
 
 def plot_function(contours=None, colors=None, vectors=None, vectors_values=None,
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     # NOTE: B and N-field models, as well as \Gamma are specified in main.cpp. Thus, after it you want to ``make``.
 
     # Work on calculon?
-    calculon = True
+    calculon = False
     # Set working directory according to this:
     # FIXME: You should change this accordingly!
     if calculon:
@@ -306,11 +306,11 @@ if __name__ == "__main__":
 
     # If ``None`` -> using all available epochs. Otherwise, use only first ``n_epochs`` epochs. Useful for debugging
     # purposes, when you want to set e.g. ``n_epochs = 2``.
-    n_epochs = None
+    n_epochs = 5
 
     # Will be used in folder name containing results. Just to distinguish the results obtained with different models
     # of magnetic field or particle density. E.g. ``toroidal``, ``equipartition_toroidal``, ...
-    short_model_description = "helical_conical"
+    short_model_description = "test"
 
     # Precession model #################################################################################################
     # LOS angle of the precession axis
