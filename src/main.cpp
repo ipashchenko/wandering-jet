@@ -26,7 +26,7 @@ namespace ph = std::placeholders;
 typedef std::chrono::high_resolution_clock Clock;
 
 
-void run_on_analytic(double los_angle, std::string epoch) {
+void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch) {
 	auto t1 = Clock::now();
 	std::clock_t start;
 	start = std::clock();
@@ -56,11 +56,7 @@ void run_on_analytic(double los_angle, std::string epoch) {
     Vector3d origin = {0., 0., 0.};
     Vector3d direction = {0., 0., 1.};
     double big_scale = 1000*pc;
-	// FIXME: This is usually used
-//	double cone_half_angle = 0.3*M_PI/180.0;
-	// For 5 deg LOS
-//	double cone_half_angle = 1.25*M_PI/180.0;
-	double cone_half_angle = 0.5*M_PI/180.0;
+//	double cone_half_angle = 0.5*M_PI/180.0;
     Cone geometry(origin, direction, cone_half_angle, big_scale);
 
     // Setting components of B-fields ==================================================================================
@@ -321,16 +317,17 @@ void run_on_analytic(double los_angle, std::string epoch) {
 }
 
 int main(int argc, char *argv[]) {
-	// This values were used to obtained double humped polarization structure
+	// These values were used to obtained double humped polarization structure
 //	double los_angle = 0.75*M_PI/180.0;
-	if(argc != 3){
+	if(argc != 4){
 		std::cout << argc << "\n";
-		std::cout << "Supply LOS-angle (rad), epoch\n";
+		std::cout << "Supply LOS-angle (rad), half-opening angle (rad) and epoch\n";
 		return 1;
 	}
 
 	double los_angle = atof(argv[1]);
-	std::string epoch = argv[2];
-    run_on_analytic(los_angle, epoch);
+	double cone_half_angle = atof(argv[2]);
+	std::string epoch = argv[3];
+    run_on_analytic(los_angle, cone_half_angle, epoch);
     return 0;
 }
