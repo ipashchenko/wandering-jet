@@ -288,7 +288,7 @@ void Observation::observe_single_pixel(Ray &ray, Pixel &pxl,  double tau_min, do
                                        double nu, string polarization, double relerr) {
     auto ij = pxl.getij();
 //    std::cout << "=====================================================================================================" << "\n";
-    std::cout << "Observing pixel " << ij.first << ", " << ij.second << "\n";
+//    std::cout << "Observing pixel " << ij.first << ", " << ij.second << "\n";
 //    std::cout << "=====================================================================================================" << "\n";
     auto ray_direction = ray.direction();
     std::list<Intersection> list_intersect = jet->hit(ray);
