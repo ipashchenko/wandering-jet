@@ -286,7 +286,7 @@ def generate_model_images(parallels_run_file, cone_half_angle, LOS_angels_rad, e
     n_jobs = 4
     if calculon:
         n_jobs = 44
-    os.system("parallel --files --results epoch_{3}" + f" --joblog log --jobs {n_jobs} -a {parallels_run_file} -n 1 -m --colsep ' ' \"./bk_transfer\"")
+    os.system("parallel --files --results generate_model_images_epoch_{3}" + f" --joblog log --jobs {n_jobs} -a {parallels_run_file} -n 1 -m --colsep ' ' \"./bk_transfer\"")
     os.chdir(cwd)
 
 
@@ -314,9 +314,9 @@ if __name__ == "__main__":
 
     # Precession model #################################################################################################
     # LOS angle of the precession axis
-    los_ange_deg_0 = 4.0
+    los_ange_deg_0 = 2.0
     # Amplitude of the precession [deg].
-    delta_deg = 0.5
+    delta_deg = 0.25
     # Period of the precession [years]
     T_years = 20.
     # Initial phase [0, 2*pi]
@@ -324,11 +324,18 @@ if __name__ == "__main__":
     ####################################################################################################################
 
     # Jet cone half-angle [deg]
-    cone_half_angle_deg = 0.5
+    cone_half_angle_deg = 0.25
 
     ####################################################################################################################
     ############################# No need to change anything below this line ###########################################
     ####################################################################################################################
+
+    if calculon:
+        n_jobs = 44
+    else:
+        n_jobs = 4
+
+    stokes = ("I", "Q", "U")
 
     # Directory with pics and UVFITS-files.
     data_dir = "/home/ilya/Downloads/1641+399"
@@ -414,6 +421,7 @@ if __name__ == "__main__":
     generate_model_images(parallels_run_file, cone_half_angle, LOS_angels_rad, epochs, jetpol_run_directory,
                           calculon=calculon)
 
+    rot_angles_deg = list()
     # Make true pics, generate and CLEAN single epoch uv-data
     for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
         print("Time = {:.2f} yrs, epoch = {}".format(time, epoch))
@@ -424,6 +432,7 @@ if __name__ == "__main__":
 
         # Jet to the West as in 1641+399
         rot_angle_deg = -90 + np.rad2deg(pa_single_epoch)
+        rot_angles_deg.append(rot_angle_deg)
 
         print("LOS angle (deg) = {:.2f}\n".format(np.rad2deg(los_angle_rad)))
         print("PA angle (deg) = {:.2f}\n".format(rot_angle_deg))
@@ -450,41 +459,58 @@ if __name__ == "__main__":
         fig.savefig(os.path.join(save_dir, "true_pol_{}.png".format(epoch)), dpi=300, bbox_inches="tight")
         plt.close()
 
-        # Substitute real uv-data with model value, rotate jet and polarization ########################################
-        uvdata = UVData(template_uvfits)
-        noise = uvdata.noise(average_freq=False, use_V=False)
-        # If one needs to decrease the noise this is the way to do it
-        for baseline, baseline_noise_std in noise.items():
-            noise.update({baseline: noise_scale_factor*baseline_noise_std})
 
-        stokes = ("I", "Q", "U", "V")
-        jms = [JetImage(z=z, n_along=n_along, n_across=n_across,
-                        lg_pixel_size_mas_min=lg_pixel_size_mas_min, lg_pixel_size_mas_max=lg_pixel_size_mas_max,
-                        jet_side=True, rot=np.deg2rad(rot_angle_deg)) for _ in stokes]
-        # cjms = [JetImage(z=z, n_along=n_along, n_across=n_across,
-        #                  lg_pixel_size_mas_min=lg_pixel_size_mas_min, lg_pixel_size_mas_max=lg_pixel_size_mas_max,
-        #                  jet_side=False) for _ in stokes]
-        for i, stk in enumerate(stokes):
-            jms[i].load_image_stokes(stk, "{}/jet_image_{}_{}_{}.txt".format(jetpol_run_directory, stk.lower(), freq_ghz, epoch), scale=1.0)
-            # cjms[i].load_image_stokes(stk, "../{}/cjet_image_{}_{}.txt".format(jetpol_run_directory, stk.lower(), freq_ghz), scale=1.0)
 
-        # List of models (for J & CJ) for all stokes
-        # js = [TwinJetImage(jms[i], cjms[i]) for i in range(len(stokes))]
 
-        uvdata.zero_data()
-        if jet_only:
-            uvdata.substitute(jms)
-        else:
-            # uvdata.substitute(js)
-            pass
-        # Rotate EVPA also
-        uvdata.rotate_evpa(np.deg2rad(rot_angle_deg))
-        uvdata.noise_add(noise)
-        if epoch in ("2014_06_05",):
-            downscale_by_freq = True
-        else:
-            downscale_by_freq = False
-        uvdata.save(os.path.join(save_dir, "artificial_{}.uvf".format(epoch)), rewrite=True, downscale_by_freq=downscale_by_freq)
+    epochs_string = " ".join([epoch for epoch in epochs])
+    rot_angles_string = " ".join([str(rot) for rot in rot_angles_deg])
+    os.system("parallel --link -k --results create_artificial_epoch_{1} --jobs %d \"python %s/create_artificial.py --save_dir %s --data_dir %s  --exec_dir %s"
+              " --epoch {1} --rot_angle_deg {2} \" ::: %s ::: %s" % (n_jobs, base_dir, save_dir, data_dir,
+                                                                     jetpol_run_directory, epochs_string,
+                                                                     rot_angles_string))
+
+        # # Substitute real uv-data with model value, rotate jet and polarization ########################################
+        # uvdata = UVData(template_uvfits)
+        # noise = uvdata.noise(average_freq=False, use_V=False)
+        # # If one needs to decrease the noise this is the way to do it
+        # for baseline, baseline_noise_std in noise.items():
+        #     noise.update({baseline: noise_scale_factor*baseline_noise_std})
+        #
+        # stokes = ("I", "Q", "U", "V")
+        # jms = [JetImage(z=z, n_along=n_along, n_across=n_across,
+        #                 lg_pixel_size_mas_min=lg_pixel_size_mas_min, lg_pixel_size_mas_max=lg_pixel_size_mas_max,
+        #                 jet_side=True, rot=np.deg2rad(rot_angle_deg)) for _ in stokes]
+        # # cjms = [JetImage(z=z, n_along=n_along, n_across=n_across,
+        # #                  lg_pixel_size_mas_min=lg_pixel_size_mas_min, lg_pixel_size_mas_max=lg_pixel_size_mas_max,
+        # #                  jet_side=False) for _ in stokes]
+        # for i, stk in enumerate(stokes):
+        #     jms[i].load_image_stokes(stk, "{}/jet_image_{}_{}_{}.txt".format(jetpol_run_directory, stk.lower(), freq_ghz, epoch), scale=1.0)
+        #     # cjms[i].load_image_stokes(stk, "../{}/cjet_image_{}_{}.txt".format(jetpol_run_directory, stk.lower(), freq_ghz), scale=1.0)
+        #
+        # # List of models (for J & CJ) for all stokes
+        # # js = [TwinJetImage(jms[i], cjms[i]) for i in range(len(stokes))]
+        #
+        # uvdata.zero_data()
+        # if jet_only:
+        #     uvdata.substitute(jms)
+        # else:
+        #     # uvdata.substitute(js)
+        #     pass
+        # # Rotate EVPA also
+        # uvdata.rotate_evpa(np.deg2rad(rot_angle_deg))
+        # uvdata.noise_add(noise)
+        # if epoch in ("2014_06_05",):
+        #     downscale_by_freq = True
+        # else:
+        #     downscale_by_freq = False
+        # uvdata.save(os.path.join(save_dir, "artificial_{}.uvf".format(epoch)), rewrite=True, downscale_by_freq=downscale_by_freq)
+
+
+
+
+
+
+
 
 
         # # CLEAN synthetic UV-data
@@ -502,10 +528,6 @@ if __name__ == "__main__":
 
 
     # CLEAN synthetic UV-data in parallel
-    if calculon:
-        n_jobs = 44
-    else:
-        n_jobs = 4
     fnames = " ".join(["artificial_{}.uvf".format(epoch) for epoch in epochs])
     os.system(f"parallel -k --jobs {n_jobs} python {base_dir}/clean_uvfits.py --mapsize_clean {mapsize[0]} {mapsize[1]} "
               f"--save_dir \"{save_dir}\" --path_to_script \"{path_to_script}\"  --beam_restore {common_beam[0]} {common_beam[1]} {common_beam[2]}  "
@@ -527,8 +549,7 @@ if __name__ == "__main__":
         if blc[1] == 0: blc = (blc[0], blc[1]+1)
         if trc[0] == ipol.shape: trc = (trc[0]-1, trc[1])
         if trc[1] == ipol.shape: trc = (trc[0], trc[1]-1)
-        masks_dict, ppol_quantile = pol_mask({stk: ccimages[stk].image for stk in
-                                              ("I", "Q", "U")}, npixels_beam, n_sigma=4,
+        masks_dict, ppol_quantile = pol_mask({stk: ccimages[stk].image for stk in stokes}, npixels_beam, n_sigma=4,
                                              return_quantile=True)
         ppol = np.hypot(ccimages["Q"].image, ccimages["U"].image)
         ppol = correct_ppol_bias(ipol, ppol, ccimages["Q"].image, ccimages["U"].image, npixels_beam)
