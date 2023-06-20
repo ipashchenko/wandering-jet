@@ -400,7 +400,7 @@ for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
 # Calculate only ``n_epochs`` epochs.
 epochs = epochs_to_calculate
 # Generate images in parallel
-generate_model_images(parallels_run_file, LOS_angels_rad, epochs, jetpol_run_directory, calculon=False)
+generate_model_images(parallels_run_file, LOS_angels_rad, epochs, jetpol_run_directory, calculon=calculon)
 
 # Make true pics, generate and CLEAN single epoch uv-data
 for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
