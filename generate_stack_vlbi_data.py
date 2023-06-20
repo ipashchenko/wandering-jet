@@ -314,7 +314,7 @@ if __name__ == "__main__":
 
     # Precession model #################################################################################################
     # LOS angle of the precession axis
-    los_ange_deg_0 = 2.0
+    los_ange_deg_0 = 4.0
     # Amplitude of the precession [deg].
     delta_deg = 0.5
     # Period of the precession [years]
@@ -417,10 +417,6 @@ if __name__ == "__main__":
     # Make true pics, generate and CLEAN single epoch uv-data
     for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
         print("Time = {:.2f} yrs, epoch = {}".format(time, epoch))
-        # Optionally do only first ``n_epochs`` epochs
-        if n_epochs is not None:
-            if i_epoch == n_epochs:
-                break
         template_uvfits = os.path.join(data_dir, "1641+399.u.{}.uvf".format(epoch))
 
         los_angle_rad = LOS_angels_rad[i_epoch]
@@ -488,22 +484,36 @@ if __name__ == "__main__":
             downscale_by_freq = True
         else:
             downscale_by_freq = False
-        uvdata.save(os.path.join(save_dir, "template.uvf"), rewrite=True, downscale_by_freq=downscale_by_freq)
+        uvdata.save(os.path.join(save_dir, "artificial_{}.uvf".format(epoch)), rewrite=True, downscale_by_freq=downscale_by_freq)
 
-        # CLEAN synthetic UV-data
-        for stk in stokes:
-            outfname = "model_cc_{}_{}.fits".format(epoch, stk.lower())
-            if os.path.exists(os.path.join(save_dir, outfname)):
-                os.unlink(os.path.join(save_dir, outfname))
-            clean_difmap(fname="template.uvf", path=save_dir,
-                         outfname=outfname, outpath=save_dir, stokes=stk.lower(),
-                         mapsize_clean=mapsize, path_to_script=path_to_script,
-                         show_difmap_output=False,
-                         # text_box=text_boxes[freq],
-                         dfm_model=os.path.join(save_dir, "model_cc_{}.mdl".format(stk.lower())),
-                         beam_restore=common_beam)
 
-        ccimages = {stk: create_clean_image_from_fits_file(os.path.join(save_dir, "model_cc_{}_{}.fits".format(epoch, stk.lower())))
+        # # CLEAN synthetic UV-data
+        # for stk in stokes:
+        #     outfname = "model_cc_{}_{}.fits".format(epoch, stk.lower())
+        #     if os.path.exists(os.path.join(save_dir, outfname)):
+        #         os.unlink(os.path.join(save_dir, outfname))
+        #     clean_difmap(fname="template.uvf", path=save_dir,
+        #                  outfname=outfname, outpath=save_dir, stokes=stk.lower(),
+        #                  mapsize_clean=mapsize, path_to_script=path_to_script,
+        #                  show_difmap_output=False,
+        #                  # text_box=text_boxes[freq],
+        #                  dfm_model=os.path.join(save_dir, "model_cc_{}.mdl".format(stk.lower())),
+        #                  beam_restore=common_beam)
+
+
+    # CLEAN synthetic UV-data in parallel
+    if calculon:
+        n_jobs = 44
+    else:
+        n_jobs = 4
+    fnames = " ".join(["artificial_{}.uvf".format(epoch) for epoch in epochs])
+    os.system(f"parallel -k --jobs {n_jobs} python {base_dir}/clean_uvfits.py --mapsize_clean {mapsize[0]} {mapsize[1]} "
+              f"--save_dir \"{save_dir}\" --path_to_script \"{path_to_script}\"  --beam_restore {common_beam[0]} {common_beam[1]} {common_beam[2]}  "
+              f"--fname ::: {fnames}")
+
+    # Plot pictures and make stack
+    for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
+        ccimages = {stk: create_clean_image_from_fits_file(os.path.join(save_dir, "artificial_{}_{}.fits".format(epoch, stk.lower())))
                     for stk in stokes}
         ipol = ccimages["I"].image
         beam = ccimages["I"].beam
@@ -546,7 +556,6 @@ if __name__ == "__main__":
         axes.invert_xaxis()
         fig.savefig(os.path.join(save_dir, f"single_epoch_p_epoch_{epoch}.png"), dpi=600, bbox_inches="tight")
         plt.close()
-
 
     np.savetxt(os.path.join(save_dir, "phis.txt"), phis)
 
