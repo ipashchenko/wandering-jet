@@ -354,7 +354,7 @@ if __name__ == "__main__":
     times, epochs = get_epochs_from_image_list(files)
 
     los_angle_rad_0 = np.deg2rad(los_ange_deg_0)
-    delta = np.deg2rad(delta_deg)
+    delta_rad = np.deg2rad(delta_deg)
 
     cone_half_angle = np.deg2rad(cone_half_angle_deg)
 
@@ -419,17 +419,22 @@ if __name__ == "__main__":
 
         # Precession with period T
         if precession:
+            delta_local = delta_rad
             phi = phi_0_rad + (time % T_years)/T_years*2*np.pi
             if phi > 2*np.pi:
                 phi -= 2*np.pi
-        # Random wandering along a cone
+            print("Precession phase = {:.2f} deg".format(np.rad2deg(phi)))
+    # Random wandering along a cone
         else:
             phi = np.random.uniform(0, 2*np.pi, 1)[0]
+            sin_delta_local = np.random.uniform(0, np.sin(delta_rad), 1)[0]
+            delta_local = np.arcsin(sin_delta_local)
+            print("Randomly generated phase = {:.2f} deg, delta = {:.2f} deg".format(np.rad2deg(phi),
+                                                                                     np.rad2deg(delta_local)))
         phis.append(phi)
-        print("Phase = {:.2f} rad".format(phi))
-        pa_single_epoch = -PA(phi, los_angle_rad_0, delta)
+        pa_single_epoch = -PA(phi, los_angle_rad_0, delta_local)
         PAs_rad.append(pa_single_epoch)
-        los_angle_rad = theta_los_rot(phi, los_angle_rad_0, delta)
+        los_angle_rad = theta_los_rot(phi, los_angle_rad_0, delta_local)
         LOS_angels_rad.append(los_angle_rad)
         epochs_to_calculate.append(epoch)
         times_to_calculate.append(time)
