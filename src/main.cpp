@@ -69,23 +69,18 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
     // Exponent of the power-law particle Lorenz factor distribution
     double s = 2.5;
     double ds = 0.0;
-    double gamma_min = 100.0;
-    PowerLaw particles(s, gamma_min, "normal");
-    // Value at r=1pc
-	// FIXME: This was used with n = 1.5
-//	double K_1 = 100;
-	double K_1 = 50;
+    double gamma_min = 10.0;
+    PowerLaw particles(s, gamma_min, "pairs");
+    // Value at r = 1 pc
+	double K_1 = 100;
     // Exponent of the decrease
-	// FIXME: this was used with B_1 = 0.1 G
 	double n = 1.5;
-	// FIXME: this was used with B_1 = 0.25 G
-//	double n = 2.0;
 
 
     // Setting V-field =================================================================================================
     VField* vfield;
     bool central_vfield = true;
-	double Gamma = 5.0;
+	double Gamma = 10.0;
     if (central_vfield) {
         vfield = new ConstCentralVField(Gamma, &geometry, 0.0);
     } else {

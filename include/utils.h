@@ -53,7 +53,7 @@ double nu_min(double gamma_min, Vector3d &b, Vector3d &n_los);
 
 double nu_min(double gamma_min, double b);
 
-// Here in coefficients n is the density of all non-thermal particles, thus we need s and gamma_min to convert to
+// Here in coefficients n_nt is the density of all non-thermal particles, thus we need s and gamma_min to convert to
 // N(gamma) using relation: N(gamma) d(gamma) = n_nt * (s-1) * gamma_min^{s-1} d(gamma)
 // For random B-field
 double k_0(double b, Vector3d &n_los, double nu, double n_nt, double s, double gamma_min);

@@ -310,11 +310,11 @@ if __name__ == "__main__":
 
     # Will be used in folder name containing results. Just to distinguish the results obtained with different models
     # of magnetic field or particle density. E.g. ``toroidal``, ``equipartition_toroidal``, ...
-    short_model_description = "test"
+    short_model_description = "helical_conical"
 
     # Precession model #################################################################################################
     # LOS angle of the precession axis
-    los_ange_deg_0 = 2.0
+    los_ange_deg_0 = 1.0
     # Amplitude of the precession [deg].
     delta_deg = 0.25
     # Period of the precession [years]
@@ -325,6 +325,15 @@ if __name__ == "__main__":
 
     # Jet cone half-angle [deg]
     cone_half_angle_deg = 0.25
+
+    # Some stages could be omitted (if they were already done and you need only e.g. to re-plot figures)
+    redo_model_image_generation = True
+    redo_artificial_uvfits_creation = True
+    redo_clean = True
+
+    # Source area - used in plotting pics and noise estimation
+    blc = (235, 205)
+    trc = (500, 310)
 
     ####################################################################################################################
     ############################# No need to change anything below this line ###########################################
@@ -348,8 +357,9 @@ if __name__ == "__main__":
     cone_half_angle = np.deg2rad(cone_half_angle_deg)
 
     # Directory to save results
-    save_dir = "{}/results/3C454.3/{}_los_{}_delta_{}_T_{}_phi0_{}".format(base_dir, short_model_description, los_ange_deg_0,
-                                                                           delta_deg, T_years, phi_0_rad)
+    save_dir = "{}/results/3C454.3/{}_los_{}_coneha_{}_delta_{}_T_{}_phi0_{}".format(base_dir, short_model_description,
+                                                                                     los_ange_deg_0, cone_half_angle_deg,
+                                                                                     delta_deg, T_years, phi_0_rad)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -364,8 +374,8 @@ if __name__ == "__main__":
     # 1641+399 stack beam from Pushkarev+2023
     common_beam = (0.73, 0.73, 0)
 
-    npixels_beam = np.pi*common_beam[0]*common_beam[1]/(4*np.log(2)*mapsize[1]**2)
-    print("#pixels in beam = {}".format(int(npixels_beam)))
+    npixels_beam = int(np.pi*common_beam[0]*common_beam[1]/(4*np.log(2)*mapsize[1]**2))
+    print("#pixels in beam = {}".format(npixels_beam))
 
     jetpol_run_directory = "{}/Release".format(base_dir)
 
@@ -417,15 +427,16 @@ if __name__ == "__main__":
     # Calculate only ``n_epochs`` epochs.
     epochs = epochs_to_calculate
     times = times_to_calculate
+
     # Generate images in parallel
-    generate_model_images(parallels_run_file, cone_half_angle, LOS_angels_rad, epochs, jetpol_run_directory,
-                          calculon=calculon)
+    if redo_model_image_generation:
+        generate_model_images(parallels_run_file, cone_half_angle, LOS_angels_rad, epochs, jetpol_run_directory,
+                              calculon=calculon)
 
     rot_angles_deg = list()
     # Make true pics, generate and CLEAN single epoch uv-data
     for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
         print("Time = {:.2f} yrs, epoch = {}".format(time, epoch))
-        template_uvfits = os.path.join(data_dir, "1641+399.u.{}.uvf".format(epoch))
 
         los_angle_rad = LOS_angels_rad[i_epoch]
         pa_single_epoch = PAs_rad[i_epoch]
@@ -434,7 +445,7 @@ if __name__ == "__main__":
         rot_angle_deg = -90 + np.rad2deg(pa_single_epoch)
         rot_angles_deg.append(rot_angle_deg)
 
-        print("LOS angle (deg) = {:.2f}\n".format(np.rad2deg(los_angle_rad)))
+        print("\nLOS angle (deg) = {:.2f}".format(np.rad2deg(los_angle_rad)))
         print("PA angle (deg) = {:.2f}\n".format(rot_angle_deg))
 
         # Plot true image of polarization
@@ -459,79 +470,22 @@ if __name__ == "__main__":
         fig.savefig(os.path.join(save_dir, "true_pol_{}.png".format(epoch)), dpi=300, bbox_inches="tight")
         plt.close()
 
-
-
-
-    epochs_string = " ".join([epoch for epoch in epochs])
-    rot_angles_string = " ".join([str(rot) for rot in rot_angles_deg])
-    os.system("parallel --link -k --results create_artificial_epoch_{1} --jobs %d \"python %s/create_artificial.py --save_dir %s --data_dir %s  --exec_dir %s"
-              " --epoch {1} --rot_angle_deg {2} \" ::: %s ::: %s" % (n_jobs, base_dir, save_dir, data_dir,
-                                                                     jetpol_run_directory, epochs_string,
-                                                                     rot_angles_string))
-
-        # # Substitute real uv-data with model value, rotate jet and polarization ########################################
-        # uvdata = UVData(template_uvfits)
-        # noise = uvdata.noise(average_freq=False, use_V=False)
-        # # If one needs to decrease the noise this is the way to do it
-        # for baseline, baseline_noise_std in noise.items():
-        #     noise.update({baseline: noise_scale_factor*baseline_noise_std})
-        #
-        # stokes = ("I", "Q", "U", "V")
-        # jms = [JetImage(z=z, n_along=n_along, n_across=n_across,
-        #                 lg_pixel_size_mas_min=lg_pixel_size_mas_min, lg_pixel_size_mas_max=lg_pixel_size_mas_max,
-        #                 jet_side=True, rot=np.deg2rad(rot_angle_deg)) for _ in stokes]
-        # # cjms = [JetImage(z=z, n_along=n_along, n_across=n_across,
-        # #                  lg_pixel_size_mas_min=lg_pixel_size_mas_min, lg_pixel_size_mas_max=lg_pixel_size_mas_max,
-        # #                  jet_side=False) for _ in stokes]
-        # for i, stk in enumerate(stokes):
-        #     jms[i].load_image_stokes(stk, "{}/jet_image_{}_{}_{}.txt".format(jetpol_run_directory, stk.lower(), freq_ghz, epoch), scale=1.0)
-        #     # cjms[i].load_image_stokes(stk, "../{}/cjet_image_{}_{}.txt".format(jetpol_run_directory, stk.lower(), freq_ghz), scale=1.0)
-        #
-        # # List of models (for J & CJ) for all stokes
-        # # js = [TwinJetImage(jms[i], cjms[i]) for i in range(len(stokes))]
-        #
-        # uvdata.zero_data()
-        # if jet_only:
-        #     uvdata.substitute(jms)
-        # else:
-        #     # uvdata.substitute(js)
-        #     pass
-        # # Rotate EVPA also
-        # uvdata.rotate_evpa(np.deg2rad(rot_angle_deg))
-        # uvdata.noise_add(noise)
-        # if epoch in ("2014_06_05",):
-        #     downscale_by_freq = True
-        # else:
-        #     downscale_by_freq = False
-        # uvdata.save(os.path.join(save_dir, "artificial_{}.uvf".format(epoch)), rewrite=True, downscale_by_freq=downscale_by_freq)
-
-
-
-
-
-
-
-
-
-        # # CLEAN synthetic UV-data
-        # for stk in stokes:
-        #     outfname = "model_cc_{}_{}.fits".format(epoch, stk.lower())
-        #     if os.path.exists(os.path.join(save_dir, outfname)):
-        #         os.unlink(os.path.join(save_dir, outfname))
-        #     clean_difmap(fname="template.uvf", path=save_dir,
-        #                  outfname=outfname, outpath=save_dir, stokes=stk.lower(),
-        #                  mapsize_clean=mapsize, path_to_script=path_to_script,
-        #                  show_difmap_output=False,
-        #                  # text_box=text_boxes[freq],
-        #                  dfm_model=os.path.join(save_dir, "model_cc_{}.mdl".format(stk.lower())),
-        #                  beam_restore=common_beam)
-
+    # Create synthetic UVFITS files
+    if redo_artificial_uvfits_creation:
+        epochs_string = " ".join([epoch for epoch in epochs])
+        rot_angles_string = " ".join([str(rot) for rot in rot_angles_deg])
+        os.system("parallel --link -k --results create_artificial_epoch_{1} --jobs %d \"python %s/create_artificial.py"
+                  " --save_dir %s --data_dir %s  --exec_dir %s"
+                  " --epoch {1} --rot_angle_deg {2} \" ::: %s ::: %s" % (n_jobs, base_dir, save_dir, data_dir,
+                                                                         jetpol_run_directory, epochs_string,
+                                                                         rot_angles_string))
 
     # CLEAN synthetic UV-data in parallel
-    fnames = " ".join(["artificial_{}.uvf".format(epoch) for epoch in epochs])
-    os.system(f"parallel -k --jobs {n_jobs} python {base_dir}/clean_uvfits.py --mapsize_clean {mapsize[0]} {mapsize[1]} "
-              f"--save_dir \"{save_dir}\" --path_to_script \"{path_to_script}\"  --beam_restore {common_beam[0]} {common_beam[1]} {common_beam[2]}  "
-              f"--fname ::: {fnames}")
+    if redo_clean:
+        fnames = " ".join(["artificial_{}.uvf".format(epoch) for epoch in epochs])
+        os.system(f"parallel -k --jobs {n_jobs} python {base_dir}/clean_uvfits.py --mapsize_clean {mapsize[0]} {mapsize[1]} "
+                  f"--save_dir \"{save_dir}\" --path_to_script \"{path_to_script}\"  --beam_restore {common_beam[0]} {common_beam[1]} {common_beam[2]}  "
+                  f"--fname ::: {fnames}")
 
     # Plot pictures and make stack
     for i_epoch, (time, epoch) in enumerate(zip(times, epochs)):
@@ -541,16 +495,17 @@ if __name__ == "__main__":
         beam = ccimages["I"].beam
         # Number of pixels in beam
 
-        std = find_image_std(ipol, beam_npixels=npixels_beam)
-        print("IPOL image std = {} mJy/beam".format(1000*std))
-        blc, trc = find_bbox(ipol, level=4*std, min_maxintensity_mjyperbeam=100*std,
-                             min_area_pix=20*npixels_beam, delta=10)
-        if blc[0] == 0: blc = (blc[0]+1, blc[1])
-        if blc[1] == 0: blc = (blc[0], blc[1]+1)
-        if trc[0] == ipol.shape: trc = (trc[0]-1, trc[1])
-        if trc[1] == ipol.shape: trc = (trc[0], trc[1]-1)
+        std = find_image_std(ipol, beam_npixels=npixels_beam, blc=blc, trc=trc)
+        print("For epoch {} IPOL image std = {} mJy/beam".format(epoch, 1000*std))
+        if blc is None or trc is None:
+            blc, trc = find_bbox(ipol, level=4*std, min_maxintensity_mjyperbeam=100*std,
+                                 min_area_pix=20*npixels_beam, delta=10)
+            if blc[0] == 0: blc = (blc[0]+1, blc[1])
+            if blc[1] == 0: blc = (blc[0], blc[1]+1)
+            if trc[0] == ipol.shape: trc = (trc[0]-1, trc[1])
+            if trc[1] == ipol.shape: trc = (trc[0], trc[1]-1)
         masks_dict, ppol_quantile = pol_mask({stk: ccimages[stk].image for stk in stokes}, npixels_beam, n_sigma=4,
-                                             return_quantile=True)
+                                             return_quantile=True, blc=blc, trc=trc)
         ppol = np.hypot(ccimages["Q"].image, ccimages["U"].image)
         ppol = correct_ppol_bias(ipol, ppol, ccimages["Q"].image, ccimages["U"].image, npixels_beam)
         pang = 0.5*np.arctan2(ccimages["U"].image, ccimages["Q"].image)
@@ -586,13 +541,13 @@ if __name__ == "__main__":
     stack_p = np.hypot(stack_q, stack_u)
     stack_pang = 0.5*np.arctan2(stack_u, stack_q)
     stack_pang_std = stat_of_masked(images_pang, stat="scipy_circstd", n_epochs_not_masked_min=3)
-    stack_p = correct_ppol_bias(stack_i, stack_p, stack_q, stack_u, npixels_beam)
+    stack_p = correct_ppol_bias(stack_i, stack_p, stack_q, stack_u, npixels_beam, blc=blc, trc=trc)
     stack_fpol = stack_p/stack_i
     masks_dict, ppol_quantile = pol_mask({"I": stack_i, "Q": stack_q, "U": stack_u}, npixels_beam, n_sigma=4,
-                                         return_quantile=True)
-    std = find_image_std(stack_i, beam_npixels=npixels_beam)
-    blc, trc = find_bbox(stack_i, level=4*std, min_maxintensity_mjyperbeam=100*std,
-                         min_area_pix=20*npixels_beam, delta=10)
+                                         return_quantile=True, blc=blc, trc=trc)
+    std = find_image_std(stack_i, beam_npixels=npixels_beam, blc=blc, trc=trc)
+    # blc, trc = find_bbox(stack_i, level=4*std, min_maxintensity_mjyperbeam=100*std,
+    #                      min_area_pix=20*npixels_beam, delta=10)
 
     # IPOL contours
     fig = iplot(stack_i, x=ccimages["I"].x, y=ccimages["I"].y,
