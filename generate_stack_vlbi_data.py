@@ -591,8 +591,8 @@ if __name__ == "__main__":
     masks_dict, ppol_quantile = pol_mask({"I": stack_i, "Q": stack_q, "U": stack_u}, npixels_beam, n_sigma=4,
                                          return_quantile=True)
     std = find_image_std(stack_i, beam_npixels=npixels_beam)
-    blc, trc = find_bbox(stack_i, level=4*std, min_maxintensity_mjyperbeam=10*std,
-                         min_area_pix=4*npixels_beam, delta=10)
+    blc, trc = find_bbox(stack_i, level=4*std, min_maxintensity_mjyperbeam=100*std,
+                         min_area_pix=20*npixels_beam, delta=10)
 
     # IPOL contours
     fig = iplot(stack_i, x=ccimages["I"].x, y=ccimages["I"].y,
