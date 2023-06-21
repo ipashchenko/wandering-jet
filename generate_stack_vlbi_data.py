@@ -313,6 +313,8 @@ if __name__ == "__main__":
     short_model_description = "helical_conical"
 
     # Precession model #################################################################################################
+    # If ``precession = False`` then rotate with random phase
+    precession = True
     # LOS angle of the precession axis
     los_ange_deg_0 = 1.0
     # Amplitude of the precession [deg].
@@ -357,16 +359,19 @@ if __name__ == "__main__":
     cone_half_angle = np.deg2rad(cone_half_angle_deg)
 
     # Directory to save results
-    save_dir = "{}/results/3C454.3/{}_los_{}_coneha_{}_delta_{}_T_{}_phi0_{}".format(base_dir, short_model_description,
-                                                                                     los_ange_deg_0, cone_half_angle_deg,
-                                                                                     delta_deg, T_years, phi_0_rad)
+    if precession:
+        save_dir = "{}/results/3C454.3/{}_los_{}_coneha_{}_delta_{}_T_{}_phi0_{}".format(base_dir, short_model_description,
+                                                                                         los_ange_deg_0, cone_half_angle_deg,
+                                                                                         delta_deg, T_years, phi_0_rad)
+    else:
+        save_dir = "{}/results/3C454.3/{}_los_{}_coneha_{}_delta_{}".format(base_dir, short_model_description,
+                                                                                         los_ange_deg_0, cone_half_angle_deg,
+                                                                                         delta_deg)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     freq_ghz = 15.4
-    # Some template UVFITS with full polarization. Its uv-coverage and noise will be used while creating fake data
-    # template_uvfits = "/home/ilya/github/time_machine/bk_transfer/uvfits/1458+718.u.2006_09_06.uvf"
-    # Multiplicative factor for noise added to model visibilities.
+    # Multiplicative factor for noise added to model visibilities. ``1.0`` means the same noise as in the observed data
     noise_scale_factor = 1.0
     # Used in CLEAN
     mapsize = (512, 0.1)
@@ -411,10 +416,15 @@ if __name__ == "__main__":
         if n_epochs is not None:
             if i_epoch == n_epochs:
                 break
-        # phi = np.random.uniform(0, 2*np.pi, 1)[0]
-        phi = phi_0_rad + (time % T_years)/T_years*2*np.pi
-        if phi > 2*np.pi:
-            phi -= 2*np.pi
+
+        # Precession with period T
+        if precession:
+            phi = phi_0_rad + (time % T_years)/T_years*2*np.pi
+            if phi > 2*np.pi:
+                phi -= 2*np.pi
+        # Random wandering along a cone
+        else:
+            phi = np.random.uniform(0, 2*np.pi, 1)[0]
         phis.append(phi)
         print("Phase = {:.2f} rad".format(phi))
         pa_single_epoch = -PA(phi, los_angle_rad_0, delta)
