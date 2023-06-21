@@ -332,8 +332,8 @@ if __name__ == "__main__":
     redo_clean = True
 
     # Source area - used in plotting pics and noise estimation
-    blc = (235, 205)
-    trc = (500, 310)
+    blc = (235, 200)
+    trc = (460, 315)
 
     ####################################################################################################################
     ############################# No need to change anything below this line ###########################################
