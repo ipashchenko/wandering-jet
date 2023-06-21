@@ -450,6 +450,7 @@ if __name__ == "__main__":
     np.savetxt(os.path.join(save_dir, "PAs.txt"), PAs_rad)
 
     if not precession and reuse_random_angles:
+        print("Re-using saved random angles!")
         phis = np.loadtxt(os.path.join(save_dir, "phis.txt"))
         LOS_angels_rad = np.loadtxt(os.path.join(save_dir, "LOSs.txt"))
         PAs_rad = np.loadtxt(os.path.join(save_dir, "PAs.txt"))
