@@ -10,13 +10,6 @@ if __name__ == "__main__":
     CLI = argparse.ArgumentParser()
     CLI.add_argument("--fname",
                      type=str)
-    CLI.add_argument("--epoch",
-                     type=str)
-    # CLI.add_argument("--beam_fractions",  # name on the CLI - drop the `--` for positional/required parameters
-    #                  nargs="*",  # 0 or more values expected => creates a list
-    #                  type=float,
-    #                  default=[1.0],  # default if nothing is provided
-    #                  )
     CLI.add_argument("--mapsize_clean",  # name on the CLI - drop the `--` for positional/required parameters
                      nargs="*",  # 0 or more values expected => creates a list
                      type=float,
@@ -36,19 +29,18 @@ if __name__ == "__main__":
     args = CLI.parse_args()
 
     uvfits_file = args.fname
-    epoch = args.epoch
     save_dir = args.save_dir
     beam_restore = args.beam_restore
     path_to_script = args.path_to_script
     mapsize_clean = args.mapsize_clean
 
     print(uvfits_file)
-    print(epoch)
     print(save_dir)
     print(beam_restore)
     print(path_to_script)
     print(mapsize_clean)
 
+    mapsize_clean = (int(mapsize_clean[0]), mapsize_clean[1])
     stokes = ("I", "Q", "U")
     base_name = os.path.split(uvfits_file)[-1]
     base_name = base_name.split(".")[0]
