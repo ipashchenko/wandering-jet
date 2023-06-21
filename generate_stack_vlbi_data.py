@@ -325,6 +325,9 @@ if __name__ == "__main__":
     phi_0_rad = 0.0
     ####################################################################################################################
 
+    # If ``precession = False`` (random wandering) - should we re-use saved angles?
+    reuse_random_angles = False
+
     # Jet cone half-angle [deg]
     cone_half_angle_deg = 0.25
 
@@ -424,7 +427,7 @@ if __name__ == "__main__":
             if phi > 2*np.pi:
                 phi -= 2*np.pi
             print("Precession phase = {:.2f} deg".format(np.rad2deg(phi)))
-    # Random wandering along a cone
+        # Random wandering along a cone
         else:
             phi = np.random.uniform(0, 2*np.pi, 1)[0]
             sin_delta_local = np.random.uniform(0, np.sin(delta_rad), 1)[0]
@@ -438,6 +441,18 @@ if __name__ == "__main__":
         LOS_angels_rad.append(los_angle_rad)
         epochs_to_calculate.append(epoch)
         times_to_calculate.append(time)
+
+    # Save phases
+    np.savetxt(os.path.join(save_dir, "phis.txt"), phis)
+    # Save LOS angles
+    np.savetxt(os.path.join(save_dir, "LOSs.txt"), LOS_angels_rad)
+    # Save PA angles
+    np.savetxt(os.path.join(save_dir, "PAs.txt"), PAs_rad)
+
+    if not precession and reuse_random_angles:
+        phis = np.loadtxt(os.path.join(save_dir, "phis.txt"))
+        LOS_angels_rad = np.loadtxt(os.path.join(save_dir, "LOSs.txt"))
+        PAs_rad = np.loadtxt(os.path.join(save_dir, "PAs.txt"))
 
     # Calculate only ``n_epochs`` epochs.
     epochs = epochs_to_calculate
@@ -476,11 +491,10 @@ if __name__ == "__main__":
 
         min_abs_lev = 0.001*np.max(imagei)
 
-        fig = plot_function(contours=imagei, colors=imagep, vectors=imagepang,
-                            vectors_values=None, min_rel_level=0.001,
-                            vinc=10, contour_color="gray", vector_color="k", cmap="gist_rainbow",
+        fig = plot_function(contours=imagei, colors=imagep, vectors=imagepang, vectors_values=None, min_rel_level=0.001,
+                            vinc=10, contour_color="gray", vector_color="k", cmap="gist_rainbow", quiver_linewidth=0.01,
                             vector_enlarge_factor=8, colorbar_label="PPOL, Jy/pixel", contour_linewidth=1.0,
-                            quiver_linewidth=0.01, plot_title="LOS = {:.2f} deg, rot = {:.2f} deg".format(np.rad2deg(los_angle_rad), rot_angle_deg))
+                            plot_title="LOS = {:.2f} deg, rot = {:.2f} deg".format(np.rad2deg(los_angle_rad), rot_angle_deg))
         fig = plot_function(contours=imagei, abs_levels=[0.01*np.max(imagei)], fig=fig, show=False, close=True)
         fig.savefig(os.path.join(save_dir, "true_pol_{}.png".format(epoch)), dpi=300, bbox_inches="tight")
         plt.close()
@@ -547,8 +561,6 @@ if __name__ == "__main__":
         axes.invert_xaxis()
         fig.savefig(os.path.join(save_dir, f"single_epoch_p_epoch_{epoch}.png"), dpi=600, bbox_inches="tight")
         plt.close()
-
-    np.savetxt(os.path.join(save_dir, "phis.txt"), phis)
 
     stack_i = np.mean(images_i, axis=0)
     stack_q = np.mean(images_q, axis=0)
