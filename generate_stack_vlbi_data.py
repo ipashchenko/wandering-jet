@@ -310,7 +310,7 @@ if __name__ == "__main__":
 
     # Will be used in folder name containing results. Just to distinguish the results obtained with different models
     # of magnetic field or particle density. E.g. ``toroidal``, ``equipartition_toroidal``, ...
-    short_model_description = "helical_conical"
+    short_model_description = "RP_equipartition"
 
     # Precession model #################################################################################################
     # If ``precession = False`` then rotate with random phase
@@ -320,7 +320,7 @@ if __name__ == "__main__":
     # Amplitude of the precession [deg].
     delta_deg = 0.25
     # Period of the precession [years]
-    T_years = 20.
+    T_years = 10.
     # Initial phase [0, 2*pi]
     phi_0_rad = 0.0
     ####################################################################################################################

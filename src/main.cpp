@@ -60,8 +60,9 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
     Cone geometry(origin, direction, cone_half_angle, big_scale);
 
     // Setting components of B-fields ==================================================================================
-	HelicalConicalBField jetbfield(1.00, 1, 89.*M_PI/180., true, 0.0, &geometry);
-//	ToroidalBField jetbfield(1.0, 1, true, 0.0, &geometry);
+  	// HelicalConicalBField jetbfield(1.00, 1, 89.*M_PI/180., true, 0.0, &geometry);
+	  // ToroidalBField jetbfield(1.0, 1, true, 0.0, &geometry);
+    ReversedPinchConicalBField jetbfield(0.5, 1.0, &geometry);
     std::vector<VectorBField*> vbfields;
     vbfields.push_back(&jetbfield);
 
