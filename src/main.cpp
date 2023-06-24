@@ -87,9 +87,9 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
         vfield = new ConstFlatVField(Gamma, &geometry, 0.0);
     }
 	
-    BKNField power_law_nfield_spine(K_1, n, &particles, true, &geometry, nullptr, vfield);
+    // BKNField power_law_nfield_spine(K_1, n, &particles, true, &geometry, nullptr, vfield);
 	// Equipartition particles density
-//	EquipartitionBKNfield power_law_nfield_spine(&particles, vbfields, &geometry, nullptr, vfield);
+	EquipartitionBKNfield power_law_nfield_spine(&particles, vbfields, &geometry, nullptr, vfield);
 	std::vector<NField*> nfields;
 	nfields.push_back(&power_law_nfield_spine);
 	
