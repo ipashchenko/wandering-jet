@@ -363,9 +363,9 @@ if __name__ == "__main__":
 
     # Directory to save results
     if precession:
-        save_dir = "{}/results/3C454.3/{}_los_{}_coneha_{}_delta_{}_T_{}_phi0_{}".format(base_dir, short_model_description,
-                                                                                         los_ange_deg_0, cone_half_angle_deg,
-                                                                                         delta_deg, T_years, phi_0_rad)
+        save_dir = "{}/results/3C454.3/{}_los_{}_coneha_{}_delta_{}_T_{}_phi0_{:2f}".format(base_dir, short_model_description,
+                                                                                            los_ange_deg_0, cone_half_angle_deg,
+                                                                                            delta_deg, T_years, phi_0_rad)
     else:
         save_dir = "{}/results/3C454.3/{}_los_{}_coneha_{}_delta_{}".format(base_dir, short_model_description,
                                                                                          los_ange_deg_0, cone_half_angle_deg,
@@ -617,3 +617,4 @@ if __name__ == "__main__":
                   "stack_fpol": stack_fpol, "stack_pang": stack_pang, "stack_pang_std": stack_pang_std}
     for stack_type, stack_array in stack_dict.items():
         np.savetxt(os.path.join(save_dir, "{}.txt".format(stack_type)), stack_array)
+
