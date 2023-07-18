@@ -3,7 +3,7 @@ import sys
 import argparse
 import numpy as np
 from jet_image import JetImage, TwinJetImage
-sys.path.insert(0, '/home/ilya/github/ve/vlbi_errors')
+sys.path.insert(0, 've/vlbi_errors')
 from uv_data import UVData
 
 

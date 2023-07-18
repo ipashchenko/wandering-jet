@@ -26,7 +26,8 @@ namespace ph = std::placeholders;
 typedef std::chrono::high_resolution_clock Clock;
 
 
-void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch) {
+void run_on_analytic(double redshift, double los_angle, double cone_half_angle, double Gamma, double B_1, double m,
+					 double pitch_angle, double tangled_fraction) {
 	auto t1 = Clock::now();
 	std::clock_t start;
 	start = std::clock();
@@ -37,7 +38,7 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
 	// Tested
 //	double redshift = 0.1;
 	// 3C 454.3
-	double redshift = 0.59;
+//	double redshift = 0.59;
 //    double los_angle = 17.0*M_PI/180.0;
 
     // FIXME: tested
@@ -56,13 +57,10 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
     Vector3d origin = {0., 0., 0.};
     Vector3d direction = {0., 0., 1.};
     double big_scale = 1000*pc;
-//	double cone_half_angle = 0.5*M_PI/180.0;
     Cone geometry(origin, direction, cone_half_angle, big_scale);
 
     // Setting components of B-fields ==================================================================================
-  	// HelicalConicalBField jetbfield(1.00, 1, 89.*M_PI/180., true, 0.0, &geometry);
-	  // ToroidalBField jetbfield(1.0, 1, true, 0.0, &geometry);
-    ReversedPinchConicalBField jetbfield(0.5, 1.0, &geometry);
+  	 HelicalConicalBField jetbfield(B_1, m, pitch_angle, true, tangled_fraction, &geometry);
     std::vector<VectorBField*> vbfields;
     vbfields.push_back(&jetbfield);
 
@@ -72,23 +70,17 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
     double ds = 0.0;
     double gamma_min = 10.0;
     PowerLaw particles(s, gamma_min, "pairs");
-    // Value at r = 1 pc
-	double K_1 = 100;
-    // Exponent of the decrease
-	double n = 1.5;
 
 
     // Setting V-field =================================================================================================
     VField* vfield;
     bool central_vfield = true;
-	double Gamma = 10.0;
     if (central_vfield) {
         vfield = new ConstCentralVField(Gamma, &geometry, 0.0);
     } else {
         vfield = new ConstFlatVField(Gamma, &geometry, 0.0);
     }
 	
-    // BKNField power_law_nfield_spine(K_1, n, &particles, true, &geometry, nullptr, vfield);
 	// Equipartition particles density
 	EquipartitionBKNfield power_law_nfield_spine(&particles, vbfields, &geometry, nullptr, vfield);
 	std::vector<NField*> nfields;
@@ -193,11 +185,11 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
             if(jet_side) {
                 file_tau = "jet_image_tau_" + freq_name + ".txt";
                 file_tau_fr = "jet_image_taufr_" + freq_name + ".txt";
-                file_i = "jet_image_i_" + freq_name + "_" + epoch + ".txt";
-                file_q = "jet_image_q_" + freq_name + "_" + epoch + ".txt";
-                file_u = "jet_image_u_" + freq_name + "_" + epoch + ".txt";
-                file_v = "jet_image_v_" + freq_name + "_" + epoch + ".txt";
-                file_l = "jet_image_l_" + freq_name + "_" + epoch + ".txt";
+                file_i = "jet_image_i_" + freq_name + ".txt";
+                file_q = "jet_image_q_" + freq_name + ".txt";
+                file_u = "jet_image_u_" + freq_name + ".txt";
+                file_v = "jet_image_v_" + freq_name + ".txt";
+                file_l = "jet_image_l_" + freq_name + ".txt";
             } else {
                 file_tau = "cjet_image_tau_" + freq_name + ".txt";
                 file_tau_fr = "cjet_image_taufr_" + freq_name + ".txt";
@@ -301,17 +293,21 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
 }
 
 int main(int argc, char *argv[]) {
-	// These values were used to obtained double humped polarization structure
-//	double los_angle = 0.75*M_PI/180.0;
-	if(argc != 4){
+	if(argc != 9){
 		std::cout << argc << "\n";
-		std::cout << "Supply LOS-angle (rad), half-opening angle (rad) and epoch\n";
+		std::cout << "Supply: redshift, LOS-angle (deg), cone half-opening angle (deg), Gamma, B_1 (G), m,"
+					 "pitch-angle (deg), tangled_fraction\n";
 		return 1;
 	}
-
-	double los_angle = atof(argv[1]);
-	double cone_half_angle = atof(argv[2]);
-	std::string epoch = argv[3];
-    run_on_analytic(los_angle, cone_half_angle, epoch);
+	double redshift = atof(argv[1]);
+	double los_angle_deg = atof(argv[2]);
+	double cone_half_angle_deg = atof(argv[3]);
+	double Gamma = atof(argv[4]);
+	double B_1 = atof(argv[5]);
+	double m = atof(argv[6]);
+	double pitch_angle_deg = atof(argv[7]);
+	double tangled_fraction = atof(atgv[8]);
+    run_on_analytic(redshift, los_angle_deg*M_PI/180., cone_half_angle_deg*M_PI/180., Gamma, B_1, m,
+					pitch_angle_deg*M_PI/180., tangled_fraction);
     return 0;
 }
