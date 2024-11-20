@@ -18,14 +18,14 @@ from image import plot as iplot
 rot_angle_deg = 0.0
 freq_ghz = 15.4
 # Directory to save files
-save_dir = "/home/ilya/github/bk_transfer/results"
+save_dir = "/home/ilya/github/time_machine/bk_transfer/results"
 # Some template UVFITS with full polarization. Its uv-coverage and noise will be used while creating fake data
-template_uvfits = "/home/ilya/github/bk_transfer/uvfits/1458+718.u.2006_09_06.uvf"
+template_uvfits = "/home/ilya/github/time_machine/bk_transfer/uvfits/1458+718.u.2006_09_06.uvf"
 # Multiplicative factor for noise added to model visibilities.
 noise_scale_factor = 0.1
 # Used in CLEAN
 mapsize = (512, 0.1)
-jetpol_run_directory = "/home/ilya/github/bk_transfer/Release"
+jetpol_run_directory = "/home/ilya/github/time_machine/bk_transfer/Release"
 
 # C++ code run parameters
 # z = 0.00436
@@ -42,7 +42,7 @@ print("Model jet extends up to {:.1f} mas!".format(np.sum(resolutions)))
 
 # Plot only jet emission and do not plot counter-jet?
 jet_only = True
-path_to_script = "/home/ilya/github/bk_transfer/scripts/script_clean_rms"
+path_to_script = "/home/ilya/github/time_machine/bk_transfer/scripts/script_clean_rms"
 uvdata = UVData(template_uvfits)
 noise = uvdata.noise(average_freq=False, use_V=False)
 # If one needs to decrease the noise this is the way to do it

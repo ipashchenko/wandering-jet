@@ -57,12 +57,13 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
     Vector3d direction = {0., 0., 1.};
     double big_scale = 1000*pc;
 //	double cone_half_angle = 0.5*M_PI/180.0;
-    Cone geometry(origin, direction, cone_half_angle, big_scale);
+	Cone geometry(origin, direction, cone_half_angle, big_scale);
+	Cone geometry_in(origin, direction, 0.75*cone_half_angle, big_scale);
 
     // Setting components of B-fields ==================================================================================
   	// HelicalConicalBField jetbfield(1.00, 1, 89.*M_PI/180., true, 0.0, &geometry);
-	  // ToroidalBField jetbfield(1.0, 1, true, 0.0, &geometry);
-    ReversedPinchConicalBField jetbfield(0.5, 1.0, &geometry);
+	  ToroidalBField jetbfield(1.0, 1, true, 0.0, &geometry);
+//    ReversedPinchConicalBField jetbfield(0.5, 1.0, &geometry);
     std::vector<VectorBField*> vbfields;
     vbfields.push_back(&jetbfield);
 
@@ -150,7 +151,7 @@ void run_on_analytic(double los_angle, double cone_half_angle, std::string epoch
 
         // FIXME: Put out of frequency loop - these do not depend on frequency
         // Setting transfer-specific parameters ========================================================================
-        double tau_max = 10;
+        double tau_max = 100;
         double dt_max_pc = 0.01;
         double dt_max = pc*dt_max_pc;
         double tau_min_log10 = -10.0;
@@ -308,7 +309,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "Supply LOS-angle (rad), half-opening angle (rad) and epoch\n";
 		return 1;
 	}
-
+	
 	double los_angle = atof(argv[1]);
 	double cone_half_angle = atof(argv[2]);
 	std::string epoch = argv[3];

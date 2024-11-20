@@ -82,6 +82,16 @@ class ToroidalBField : public VectorBField {
 };
 
 
+class LinearToroidalBField : public VectorBField {
+	public:
+		LinearToroidalBField(double b_0, double n_b, bool in_plasma_frame, double tangled_fraction=0.0, Geometry* geometry_out= nullptr, Geometry* geometry_in= nullptr) ;
+		Vector3d _bf(const Vector3d &point) const override ;
+	private:
+		double b_0_;
+		double n_b_;
+};
+
+
 class HelicalCylinderBField : public VectorBField {
     public:
         HelicalCylinderBField(double b_0, double pitch_angle, bool in_plasma_frame, double tangled_fraction=0.0,

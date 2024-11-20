@@ -140,6 +140,23 @@ Vector3d ToroidalBField::_bf(const Vector3d &point) const {
 }
 
 
+LinearToroidalBField::LinearToroidalBField(double b_0, double n_b, bool in_plasma_frame, double tangled_fraction, Geometry* geometry_out, Geometry* geometry_in) :
+	VectorBField(in_plasma_frame, tangled_fraction, geometry_out, geometry_in), b_0_(b_0), n_b_(n_b){};
+
+Vector3d LinearToroidalBField::_bf(const Vector3d &point) const {
+	double x = point[0];
+	double y = point[1];
+	double r = hypot(x, y);
+	double r_border = geometry_out_->radius_at_given_distance(point);
+	double z = point[2];
+	double fi = atan2(y, x);
+	double b = b_0_*(r/r_border)*pow(z/pc, -n_b_);
+	return {-sin(fi)*b, cos(fi)*b, 0};
+}
+
+
+
+
 // TODO: Check helicity (rotation direction) for z < 0
 HelicalCylinderBField::HelicalCylinderBField(double b_0, double pitch_angle, bool in_plasma_frame, double tangled_fraction, Geometry* geometry_out, Geometry* geometry_in) :
     VectorBField(in_plasma_frame, tangled_fraction, geometry_out, geometry_in), b_0_(b_0), pitch_angle_(pitch_angle) {};
